@@ -1,0 +1,52 @@
+buildscript {
+    ext {
+        kotlin_version = '1.1.4-3'
+        retrofit_version = '2.2.0'
+        okhttp_version = '3.8.1'
+    }
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+    }
+}
+
+apply plugin: 'kotlin'
+
+version = '0.0.1-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+    jcenter()
+    maven { url "https://repo.spring.io/snapshot" }
+    maven { url "https://repo.spring.io/milestone" }
+}
+
+
+dependencies {
+
+    compile "org.jetbrains.kotlin:kotlin-stdlib-jre8:$kotlin_version"
+
+    compile 'org.jetbrains.kotlinx:kotlinx-coroutines-core:0.18'
+
+    testCompile 'junit:junit:4.12'
+
+    // Gson
+    compile 'com.google.code.gson:gson:2.8.0'
+    // Rx
+    compile 'io.reactivex.rxjava2:rxjava:2.1.0'
+    // Networking
+    compile "com.squareup.retrofit2:retrofit:$retrofit_version"
+    compile "com.squareup.retrofit2:converter-gson:$retrofit_version"
+    compile "com.squareup.retrofit2:adapter-rxjava2:$retrofit_version"
+
+    compile "com.squareup.okhttp3:okhttp:$okhttp_version"
+    compile "com.squareup.okhttp3:logging-interceptor:$okhttp_version"
+}
+
+kotlin {
+    experimental {
+        coroutines "enable"
+    }
+}
