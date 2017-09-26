@@ -15,10 +15,9 @@ import org.junit.Test
 class ChannelWeatherTest {
 
     @Test
-    fun testWeatherChannels() = runBlocking {
+    fun testWeather() = runBlocking {
         val ws = Components.retrofitWS(Components.SERVER_URL)
         val address = "Paris, france"
-
         val locationChannel = channelGeocode(address, ws)
         val weatherChannel = channelWeather(locationChannel, ws)
         weatherChannel.consumeEach { fd ->
@@ -26,19 +25,27 @@ class ChannelWeatherTest {
         }
         locationChannel.cancel()
         weatherChannel.cancel()
+        println("weather done !")
     }
 
-    fun channelWeather(locationChannel: ProducerJob<Location>, ws: WeatherWS): ProducerJob<Forecastday_> = produce(CommonPool) {
+    fun channelWeather(locationChannel: ProducerJob<Location?>, ws: WeatherWS): ProducerJob<Forecastday_> = produce(CommonPool) {
         locationChannel.consumeEach { location ->
-            val list = ws.weather(location.lat, location.lng, "EN").execute().body().forecast?.simpleforecast?.forecastday?.take(4).orEmpty()
-            list.forEach { send(it) }
+            if (location != null) {
+                val list = ws.weather(location.lat, location.lng, "EN").execute().body().forecast?.simpleforecast?.forecastday?.take(4).orEmpty()
+                list.forEach { send(it) }
+            } else {
+                close()
+            }
         }
     }
 
-    fun channelGeocode(location: String, ws: WeatherWS): ProducerJob<Location> = produce(CommonPool) {
+    fun channelGeocode(location: String, ws: WeatherWS) = produce(CommonPool) {
         val body = ws.geocode(location).execute().body()
-        body.getLocation()?.let {
-            send(it)
+        val loc = body.getLocation()
+        if (loc != null) {
+            send(loc)
+        } else {
+            close()
         }
     }
 }
